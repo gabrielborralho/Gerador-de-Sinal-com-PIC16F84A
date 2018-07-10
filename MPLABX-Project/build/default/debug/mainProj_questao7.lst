@@ -1,0 +1,294 @@
+MPASM 5.75             MAINPROJ_QUESTAO7.ASM   11-19-2017  12:53:42         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ; Universidade Federal do Maranhão - UFMA
+                      00002 ; Centro de Ciências Exatas e Tecnologia - CCET
+                      00003 ; Departamento de Engenharia de Eletricidade - DEE
+                      00004 ; Introdução à Arquitetura de Computadores - IACOM
+                      00005 ; Prof. Dr. Denivaldo Lopes
+                      00006 ; Alunos: Antonio Gabriel Sousa Borralho
+                      00007 ;         Graziela
+                      00008 ;         Matheus Barbosa
+                      00009 ;         Lucas Soares
+                      00010 ;         Raí Gabriel
+                      00011 ;   
+                      00012 ;   Microcontrolador: PIC16F84A         Clock: 4MHz
+                      00013 ;
+                      00014 ;   QUESTAO 7:
+                      00015 ;   Um sistema hardware/software é baseado no PIC16F84A e deve verificar um sensor A continuamente (util
+                            ize Porta A,
+                      00016 ;   bit RA1), caso o sensor retorne 1, então deve enviar o valor 0x0C pela porta B, caso contrário 0xC0 
+                            pela porta B. O
+                      00017 ;   mesmo sistema deve enviar pela porta A, bit RA2, um sinal quadrado com frequência de 24Hz. O clock d
+                            o PIC16F84A
+                      00018 ;   deve ser de 4 MHz.
+                      00019 ;
+                      00020 ;   * PORTA A (pino RA1) como entrada (push buttom)
+                      00021 ;   * PORTA A (pino RA2) como saída (LED)
+                      00022 ;   * Configura o timer0 para fazer piscal um LED (PORTA, pino RA2)
+                      00023 ;     a cada 41,6ms, ou seja, com uma frequência de 24Hz
+                      00024 ;   * Ler o dado de entrada na PORTA (RA1),
+                      00025 ;     se (RA!==1), então faz RB1=0x0C senão faz RB1=0xC0.
+                      00026 
+                      00027 ;--- ARQUIVOS INCLUÍDOS NO PROJETO ---
+                      00028     #include <p16f84a.inc>
+                      00001         LIST
+                      00002 
+                      00003 ;==========================================================================
+                      00004 ; Build date : Jul 02 2017
+                      00005 ;  MPASM PIC16F84A processor include
+                      00006 ; 
+                      00007 ;  (c) Copyright 1999-2017 Microchip Technology, All rights reserved
+                      00008 ;==========================================================================
+                      00009 
+                      00209         LIST
+                      00029 
+                      00030 ; --- FUSE Bits ---
+                      00031 ; Cristal oscilador externo 4MHz, sem watchdog timer, sem power up timer, sem proteção de código
+                      00032 ;   __config 0x3FF9
+2007   3FF9           00033     __CONFIG _FOSC_XT & _WDTE_OFF & _PWRTE_OFF & _CP_OFF
+                      00034  
+                      00035 ; --- PAGINAÇÃO DE MEMÓRIA ---
+                      00036     #define     BANK0       bcf STATUS, RP0         ;cria um mnemônico para o banco 0 de memória
+                      00037     #define     BANK1       bsf STATUS, RP0         ;cria um mnemônico para o banco 1 de memória
+                      00038 
+                      00039 ;LABEL      INSTRUÇÃO   PARAMÊTRO   COMENTÁRIO
+                      00040             ORG         0x000       ; INÍCIO DO PROGRAMA EM 0x000
+MPASM 5.75             MAINPROJ_QUESTAO7.ASM   11-19-2017  12:53:42         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0000   2???           00041             GOTO        START_PROG  ; VAI PARA START_PROG
+                      00042                                  
+                      00043 ; --- SUBROTINA ---
+                      00044 ; --- SALVA CONTEXTO DO PIC (W e STATUS) ---    
+                      00045 SUB_INT     ORG         0x004       ; ENDEREÇO DO PROGRAMA EM 0x004
+                      00046                                     ;
+                      00047                                     ;
+0004   008C           00048             MOVWF       H'0C'       ; 0x0C <- W
+0005   0E03           00049             SWAPF       STATUS,W    ; W <- STATUS
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0006   00C0           00050             MOVWF       H'C0'       ; 0xC0 <- W
+                      00051                                     ; FIM SALVA CONTEXTO DO PIC
+                      00052                                     ;
+                      00053                                     ; COLOCAR 0xAF EM TIMER0
+0007   30AF           00054             MOVLW       0xAF        ; W <- 0xAF => H'AF' = D'174' => O led  irá oscilar em 24Hz
+0008   0081           00055             MOVWF       TMR0        ; TMR0 <- W
+                      00056                                     ;
+                      00057 ; --- RESTAURA CONTEXTO DO PIC (W e STATUS) ---
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0009   0E40           00058             SWAPF       H'C0',W ;
+000A   0083           00059             MOVWF       STATUS      ; STATUS <- W
+000B   0E8C           00060             SWAPF       H'0C',F
+000C   0E0C           00061             SWAPF       H'0C',W
+                      00062                                     ; FIM RESTAURA CONTEXTO DO PIC
+                      00063                                     ;
+                      00064     
+000D   110B           00065             BCF         INTCON,T0IF ; REARMA Timer0
+000E   0009           00066             RETFIE                  ; RETORNA DA SUBROTINA
+                      00067                                     ;
+                      00068 ;--- CONFIGURAÇÃO DAS PORTAS DE ENTRADAS E SAÍDAS ---
+                      00069                                     ; DA PORTA A (pino RA1) como ENTRADA
+                      00070                                     ; DA PORTA A (pino RA2) como SAÍDA
+                      00071                                     ; DA PORTA B como SAÍDA
+000F   1283           00072 START_PROG  BANK0                   ; Chavea para banco 0 de memória
+0010   0185           00073             CLRF        PORTA       ; LIMPA PORTA A
+0011   1683           00074             BANK1                   ; Chavea para banco 1 de memória
+0012   3002           00075             MOVLW       H'02'       ; W <- 0x02 => B'0000 0010' => apenas RA1 como INPUT
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0013   0085           00076             MOVWF       TRISA       ; TRISB <- W            
+                      00077                                     ; FIM DA CONFIGURAÇÃO DA PORTA A
+                      00078                                     ;
+                      00079                                     ; INÍCIO DA CONFIGURAÇÃO DA PORTA B
+0014   1283           00080             BANK0                   ; Chavea para banco 0 de memória
+0015   0186           00081             CLRF        PORTB       ; LIMPA PORTA B
+0016   1683           00082             BANK1                   ; Chavea para banco 1 de memória
+0017   3000           00083             MOVLW       H'00'       ; W <- 0x00 => B'0000 0000' => todos os pinos como OUTPUT
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0018   0086           00084             MOVWF       TRISB       ; TRISB <- W
+0019   1283           00085             BANK0                   ; Chavea para banco 0 de memória
+                      00086                                     ; FIM DA CONFIGURAÇÃO PORTA B
+                      00087                                     ;
+                      00088 ; --- CONFIGURAÇÃO DO TIMER0 ---
+001A   1683           00089             BANK1                       ; Chavea para banco 1 de memória
+MPASM 5.75             MAINPROJ_QUESTAO7.ASM   11-19-2017  12:53:42         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+001B   1281           00090             BCF         OPTION_REG,T0CS ; SELECIONA "TIMER MODE"
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+001C   1181           00091             BCF         OPTION_REG,PSA  ; SELECIONA PRE-ESCALAR PARA TIMER0
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+001D   1501           00092             BSF         OPTION_REG,PS2
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+001E   1481           00093             BSF         OPTION_REG,PS1
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+001F   1401           00094             BSF         OPTION_REG,PS0
+                      00095             
+0020   1283           00096             BANK0                       ; Chavea para banco 0 de memória
+0021   30AF           00097             MOVLW       0xAF            ; W <- 0xAF => H'AF' = D'174' => O led  irá oscilar em 24Hz
+0022   0081           00098             MOVWF       TMR0            ; TMR0 <- W
+0023   178B           00099             BSF         INTCON,GIE      ; HABILITA INTERRUPÇÕES
+0024   168B           00100             BSF         INTCON,T0IE     ; HABILITA INTERRUPÇÃO timer 0
+                      00101                                         ; FIM DA CONFIGURAÇÃO DO TIMER0
+                      00102 ; --- LOOP ---
+                      00103 ; while(1){
+                      00104 ;   if (RA1 == 1){
+                      00105 ;       PORTB = 0x0C;
+                      00106 ;   }else{
+                      00107 ;       PORTB = 0xC0;
+                      00108 ;   }
+                      00109 ; }                                 
+0025   0000           00110 LOOP        NOP
+                      00111                                     ;   INÍCIO IF1
+0026   1C85           00112 IF1         BTFSS       PORTA,RA1   ;   TESTA BIT RA1 SE "1" SALTA PRÓXIMA INST.           
+0027   2???           00113             GOTO        ELSE_IF1    ;   SALTA PARA ELSE
+0028   300C           00114 THEN_IF1    MOVLW       H'0C'       ;   W <- 0x0C
+0029   0086           00115             MOVWF       PORTB       ;   PORTB <- W
+002A   2???           00116             GOTO        END_IF1     ;   VAI PARA FINAL DO IF1
+002B   30C0           00117 ELSE_IF1    MOVLW       H'C0'       ;   W <- 0xC0
+002C   0086           00118             MOVWF       PORTB       ;   PORTB <- W
+002D   0000           00119 END_IF1     NOP                     ;   FIM IF1
+002E   2???           00120             GOTO        LOOP        ;   VOLTA PARA O LOOP
+3FF9                  00121             END
+MPASM 5.75             MAINPROJ_QUESTAO7.ASM   11-19-2017  12:53:42         PAGE  4
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+BANK0                             bcf STATUS, RP0
+BANK1                             bsf STATUS, RP0
+C                                 00000000
+DC                                00000001
+EEADR                             00000009
+EECON1                            00000088
+EECON2                            00000089
+EEDATA                            00000008
+EEIE                              00000006
+EEIF                              00000004
+ELSE_IF1                          0000002B
+END_IF1                           0000002D
+F                                 00000001
+FSR                               00000004
+GIE                               00000007
+IF1                               00000026
+INDF                              00000000
+INTCON                            0000000B
+INTE                              00000004
+INTEDG                            00000006
+INTF                              00000001
+IRP                               00000007
+LOOP                              00000025
+NOT_PD                            00000003
+NOT_RBPU                          00000007
+NOT_TO                            00000004
+OPTION_REG                        00000081
+PCL                               00000002
+PCLATH                            0000000A
+PORTA                             00000005
+PORTB                             00000006
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+RA0                               00000000
+RA1                               00000001
+RA2                               00000002
+RA3                               00000003
+RA4                               00000004
+RB0                               00000000
+RB1                               00000001
+RB2                               00000002
+RB3                               00000003
+RB4                               00000004
+RB5                               00000005
+RB6                               00000006
+RB7                               00000007
+RBIE                              00000003
+RBIF                              00000000
+RD                                00000000
+RP0                               00000005
+RP1                               00000006
+MPASM 5.75             MAINPROJ_QUESTAO7.ASM   11-19-2017  12:53:42         PAGE  5
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+START_PROG                        0000000F
+STATUS                            00000003
+SUB_INT                           00000004
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+T0SE                              00000004
+THEN_IF1                          00000028
+TMR0                              00000001
+TMR0IE                            00000005
+TMR0IF                            00000002
+TRISA                             00000085
+TRISA0                            00000000
+TRISA1                            00000001
+TRISA2                            00000002
+TRISA3                            00000003
+TRISA4                            00000004
+TRISB                             00000086
+TRISB0                            00000000
+TRISB1                            00000001
+TRISB2                            00000002
+TRISB3                            00000003
+TRISB4                            00000004
+TRISB5                            00000005
+TRISB6                            00000006
+TRISB7                            00000007
+W                                 00000000
+WR                                00000001
+WREN                              00000002
+WRERR                             00000003
+Z                                 00000002
+_CONFIG                           00002007
+_CP_OFF                           00003FFF
+_CP_ON                            0000000F
+_DEVID1                           00002006
+_FOSC_EXTRC                       00003FFF
+_FOSC_HS                          00003FFE
+_FOSC_LP                          00003FFC
+_FOSC_XT                          00003FFD
+_HS_OSC                           00003FFE
+_IDLOC0                           00002000
+_IDLOC1                           00002001
+_IDLOC2                           00002002
+_IDLOC3                           00002003
+_LP_OSC                           00003FFC
+_PWRTE_OFF                        00003FFF
+_PWRTE_ON                         00003FF7
+_RC_OSC                           00003FFF
+_WDTE_OFF                         00003FFB
+_WDTE_ON                          00003FFF
+_WDT_OFF                          00003FFB
+_WDT_ON                           00003FFF
+_XT_OSC                           00003FFD
+MPASM 5.75             MAINPROJ_QUESTAO7.ASM   11-19-2017  12:53:42         PAGE  6
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+__16F84A                          00000001
+__DEBUG                           
+__MPLAB_DEBUGGER_SIMULATOR        1
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     9 reported,     0 suppressed
+
+

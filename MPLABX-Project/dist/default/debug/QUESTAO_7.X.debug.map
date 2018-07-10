@@ -1,0 +1,48 @@
+MPLINK 5.08, LINKER
+Linker Map File - Created Sun Nov 19 12:53:43 2017
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                   .org_0       code   0x000000    program   0x000002
+                   .cinit    romdata   0x000001    program   0x000004
+                   .org_1       code   0x000004    program   0x000056
+.config_2007_BUILD/DEFAULT/DEBUG/MAINPROJ_QUE       code   0x002007    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000002      
+                            0x000004    0x00002e      
+                            0x002007    0x002007      
+            47 out of 1094 program addresses used, program memory utilization is 4%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                 ELSE_IF1   0x00002b    program     static C:\Users\Gabriel Borralho\MPLABXProjects\QUESTAO_7.X\mainProj_questao7.asm
+                  END_IF1   0x00002d    program     static C:\Users\Gabriel Borralho\MPLABXProjects\QUESTAO_7.X\mainProj_questao7.asm
+                      IF1   0x000026    program     static C:\Users\Gabriel Borralho\MPLABXProjects\QUESTAO_7.X\mainProj_questao7.asm
+                     LOOP   0x000025    program     static C:\Users\Gabriel Borralho\MPLABXProjects\QUESTAO_7.X\mainProj_questao7.asm
+               START_PROG   0x00000f    program     static C:\Users\Gabriel Borralho\MPLABXProjects\QUESTAO_7.X\mainProj_questao7.asm
+                  SUB_INT   0x000004    program     static C:\Users\Gabriel Borralho\MPLABXProjects\QUESTAO_7.X\mainProj_questao7.asm
+                 THEN_IF1   0x000028    program     static C:\Users\Gabriel Borralho\MPLABXProjects\QUESTAO_7.X\mainProj_questao7.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                  SUB_INT   0x000004    program     static C:\Users\Gabriel Borralho\MPLABXProjects\QUESTAO_7.X\mainProj_questao7.asm
+               START_PROG   0x00000f    program     static C:\Users\Gabriel Borralho\MPLABXProjects\QUESTAO_7.X\mainProj_questao7.asm
+                     LOOP   0x000025    program     static C:\Users\Gabriel Borralho\MPLABXProjects\QUESTAO_7.X\mainProj_questao7.asm
+                      IF1   0x000026    program     static C:\Users\Gabriel Borralho\MPLABXProjects\QUESTAO_7.X\mainProj_questao7.asm
+                 THEN_IF1   0x000028    program     static C:\Users\Gabriel Borralho\MPLABXProjects\QUESTAO_7.X\mainProj_questao7.asm
+                 ELSE_IF1   0x00002b    program     static C:\Users\Gabriel Borralho\MPLABXProjects\QUESTAO_7.X\mainProj_questao7.asm
+                  END_IF1   0x00002d    program     static C:\Users\Gabriel Borralho\MPLABXProjects\QUESTAO_7.X\mainProj_questao7.asm
+
+
